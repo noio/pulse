@@ -1,0 +1,23 @@
+<script src="http://localhost:9000/midi.io/midi.io.js"></script>
+<script>
+
+    var devices = new MidiDevices();
+
+    // show all midi devices
+    devices.fetch({
+        success: function() {
+            console.log('found devices', devices.models);
+        }
+    });
+
+    // tie a midi event to a specific function
+    devices.learn(function() {
+        console.log('the next midi button pressed will always log me!');
+    });
+
+    // log all midi events for all devices
+    devices.on('midi', function(msg) {
+        console.log('got midi', msg);
+    });
+
+</script>
