@@ -1,23 +1,37 @@
-<script src="http://localhost:9000/midi.io/midi.io.js"></script>
+<!-- <script src="socket.io-client/socket.io-client.js"></script> -->
+<!-- <script src="http://cdn.socket.io/stable/socket.io.js"></script> -->
+<!-- <script src="/socket.io/socket.io.js"></script> -->
 <script>
+// // Create a socket instance
+// var socket = new WebSocket('ws://localhost:9000');
 
-    var devices = new MidiDevices();
+// // Open the socket
+// socket.onopen = function(event) {
+    
+//     // Send an initial message
+//     socket.send('I am the client and I\'m listening!');
+    
+//     // Listen for messages
+//     socket.onmessage = function(event) {
+//         console.log('Client received a message',event);
+//     };
+    
+//     // Listen for socket closes
+//     socket.onclose = function(event) {
+//         console.log('Client notified socket has closed',event);
+//     };
+    
+//     // To close the socket....
+//     //socket.close()
+    
+// };
+</script>
 
-    // show all midi devices
-    devices.fetch({
-        success: function() {
-            console.log('found devices', devices.models);
-        }
+
+<script src="http://localhost:8000/pulse.js"></script>
+<script>
+    pulse.connect('http://localhost:9000', function(devices){
+        console.log(devices);
+        pulse.subscribe(0);
     });
-
-    // tie a midi event to a specific function
-    devices.learn(function() {
-        console.log('the next midi button pressed will always log me!');
-    });
-
-    // log all midi events for all devices
-    devices.on('midi', function(msg) {
-        console.log('got midi', msg);
-    });
-
 </script>
