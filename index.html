@@ -1,0 +1,82 @@
+<html>
+<head>
+
+<script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
+<script type="text/javascript" src="http://localhost:8000/pulse.js"></script>
+
+<style type="text/css">
+body { 
+    background: linear-gradient(135deg, #dc80ed 0%,#eaba4b 100%);
+}
+#setup div {
+    float: left;
+}
+#deck {
+    width: 200px; height: 200px;
+    padding: 10px;
+    background: #444;
+}
+#deck div {
+    width: 60px; height: 60px;
+    border: 70px solid black;
+    border-radius: 100px;
+    background: url('http://placekitten.com/60/60');
+}
+.speaker {
+    height: 200px; width: 80px;
+    padding: 10px; margin: 0 10px;
+    background: black;
+}
+.speaker div{
+    border: 40px solid white;
+    border-radius: 40px;
+}
+</style>
+</head>
+
+
+<body>
+    <div id='container'>
+
+
+    <div>
+        <input id='serverAddress' type='text' value='http://'></input>
+        <input id='connectButton' type='button' value='connect'></input>
+    </div>
+
+    <div id='setup'>
+        <div class='speaker'>
+            <div></div>
+        </div>
+        <div id='deck'>
+            <div></div>
+        </div>
+        <div class='speaker'>
+            <div></div>
+        </div>
+    </div>
+
+    </div>
+
+<script>
+
+    pulse.connect('http://localhost:9000', function(devices){
+        console.log(devices);
+        pulse.subscribe(0);
+    });
+
+    function show(){
+        // document.getElementById('record').style.transform = 'rotate(' + (pulse.beat() % 1) * 360 + 'deg)';
+        var r = 'rotate(' + (pulse.beat() % 4) * 90 + 'deg)';
+        console.log(r);
+        $('#deck div').css('transform', r);
+        var s = 20 + 20 * pulse.pulse();
+        $('.speaker div').css('opacity', pulse.pulse());
+        setTimeout(show, 10);
+    }
+    show();
+</script>
+
+</body>
+
+</html>

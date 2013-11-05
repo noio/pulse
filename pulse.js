@@ -1,6 +1,7 @@
 var pulse = function(module){
 
 	module.MIDI_CLOCK = 248;
+	module.MIDI_START = 250;
 	module.PPQN = 24;
 	
 	module.beats = [];
@@ -21,6 +22,12 @@ var pulse = function(module){
 		}
 	}
 
+	function sync(){
+		console.log('Synced.')
+		clocks = 0;
+		latest = 0;
+	}
+
 	module.tap = function(){
 		module.beats.push((new Date).getTime());
 		if (module.beats.length > 5){
@@ -29,6 +36,23 @@ var pulse = function(module){
 			// convert 'milliseconds per beats to 'beats per minute'
 			module.bpm = 60000 / module.mspb;
 		}
+		latest = Math.round(latest) + 1;
+	}
+
+	
+
+	/**
+	* Get the current beat
+	*/
+	module.beat = function(){
+		return latest + ((new Date).getTime() - module.beats[module.beats.length-1]) / module.mspb;
+	}
+
+	/**
+	* Get a pulse on the beat
+	*/
+	module.pulse = function(){
+		return Math.exp(-Math.pow( Math.pow(module.beat() % 1, 0.3) - 0.5, 2) / 0.05)
 	}
 
 	/**
@@ -36,16 +60,22 @@ var pulse = function(module){
 	* and list its devices.
 	*/
 	module.connect = function(server, callback){
+		if (socket){
+			module.disconnect();
+		}
 		var script = document.createElement('script');
 		script.src = server + '/socket.io/socket.io.js';
 		console.log(script)
 		
 		script.onload = function () {	
     		socket = io.connect(server);
-  			socket.on('devices', function (devices) {
-    			if (callback){
-    				callback(devices);
-    			}
+  			socket.on('midi', function (data) {
+	    		if (data == module.MIDI_CLOCK){
+	    			clock();
+	    		}
+	    		else if (data == module.MIDI_START){
+	    			sync();
+	    		}
   			});
 		};
 
@@ -53,23 +83,13 @@ var pulse = function(module){
 	}
 
 	/**
-	* Subscribe to a specific device
-	*/
-	module.subscribe = function(id){
-		socket.emit('subscribe', 0);
-		socket.on('midi', function (data) {
-    		if (data == module.MIDI_CLOCK){
-    			clock();
-    		}
-    		
-  		});
-	}
-
-	/**
 	* Disconnect from the pulse server
 	*/
 	module.disconnect = function(){
-		socket.disconnect();
+		if (socket){
+			socket.disconnect();
+			socket = null;
+		}
 	}
 
 	return module;
