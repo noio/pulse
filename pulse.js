@@ -3,10 +3,11 @@ var pulse = function(module){
 	module.MIDI_CLOCK = 248;
 	module.MIDI_START = 250;
 	module.PPQN = 24;
+	module.TAP_TIMEOUT = 20;
 	
 	module.beats = [];
 	module.bpm = 120;
-	module.mspb = 2000; 
+	module.mspb = 600; 
 
 	var socket = null;
 	var clocks = 0;
@@ -29,17 +30,22 @@ var pulse = function(module){
 	}
 
 	module.tap = function(){
-		module.beats.push((new Date).getTime());
-		if (module.beats.length > 5){
-			module.beats.shift()
-			module.mspb = (module.beats[4] - module.beats[0]) / 4;
+		var now = (new Date).getTime();
+		if (now - module.beats[module.beats.length - 1] > module.TAP_TIMEOUT * module.mspb) {
+			module.beats = []
+		}
+		module.beats.push(now);
+		console.log(module.beats)
+		if (module.beats.length > 1){
+			if (module.beats.length >= 4){
+				module.beats.shift()
+			}
+			module.mspb = (module.beats[module.beats.length-1] - module.beats[0]) / (module.beats.length-1);
 			// convert 'milliseconds per beats to 'beats per minute'
 			module.bpm = 60000 / module.mspb;
 		}
 		latest = Math.round(latest) + 1;
 	}
-
-	
 
 	/**
 	* Get the current beat

@@ -4,74 +4,168 @@
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
 <script type="text/javascript" src="http://localhost:8000/pulse.js"></script>
 
+<!-- <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/styles/monokai.css"> -->
+<!-- <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js"></script> -->
+<link href='http://fonts.googleapis.com/css?family=Vibur|Raleway' rel='stylesheet' type='text/css'>
 <style type="text/css">
 body { 
     background: linear-gradient(135deg, #dc80ed 0%,#eaba4b 100%);
+    font: 16px 'Raleway', Arial, sans-serif;
+    color: #333;
+    font-weight: 400;
+    line-height: 1.8;
 }
-#setup div {
+h1{
+    font: 120px 'Vibur',cursive;
+    margin: 20px 0;
+}
+strong {
+    letter-spacing: -1px;
+    font-weight: 900;
+    text-shadow: 1px 1px #555;
+}
+
+code {
+   color: #4cc0e1;
+   padding: 2px 5px;
+   border-radius: 6px;
+   background: #222;
+   font: 16px 'Lucida Console', Monaco, monospace; 
+}
+
+#container {
+    width: 680px;
+    margin: 0 auto;
+}
+
+#inputs {
+    background: #222;
+    padding: 10px;
+    border-radius: 10px;
+}
+input[type="text"] {
+    font: 16px 'Lucida Console', Monaco, monospace;
+    color: #4cc0e1;
+    border: none;
+    background: transparent;
+    outline: none;
+    width: 500px;
+    border-bottom: 1px solid #4cc0e1;
+}
+input[type="button"] {
+    font: 16px 'Lucida Console', Monaco, monospace;
+    color: white;
+    background: black;
+    border: none;
+    cursor: pointer;
+    border-radius: 8px;
+    box-shadow: 0px 2px 0px #555;
+    outline: none;
+}
+input[type="button"]:hover{
+    background: #222;
+}
+input[type="button"]:active{
+    background: #555;
+}
+#demo {
+    margin: 20px 0;
+    padding: 10px;
+    width: 100%;
+    height: 250px;
+    /*background: #222;*/
+}
+#demo div {
     float: left;
 }
 #deck {
     width: 200px; height: 200px;
+    float: right;
     padding: 10px;
-    background: #444;
 }
-#deck div {
-    width: 60px; height: 60px;
-    border: 70px solid black;
-    border-radius: 100px;
-    background: url('http://placekitten.com/60/60');
-}
-.speaker {
-    height: 200px; width: 80px;
-    padding: 10px; margin: 0 10px;
+#deck .grooves {
     background: black;
+    border: 4px dashed #333;
+    border-radius: 100px;
 }
-.speaker div{
-    border: 40px solid white;
-    border-radius: 40px;
+#deck .image {
+    margin: 46px;
+    width: 100px; height: 100px;
+    background: url('http://placekitten.com/125/125');
+    border-radius: 50px;
 }
+
 </style>
+
 </head>
 
 
 <body>
     <div id='container'>
+        <h1>pulse</h1>
+        <p><strong>pulse</strong> is a small node.js server and client that pipes <strong>MIDI Clock</strong> 
+            messages to your browser through a WebSocket. It also  interpolates the <em>bpm</em> and current 
+            <em>phase</em>. Simply run the server and use:
+        </p>
 
+        <pre><code>pulse.connect('http://yourserver:9000'); </code></pre>
 
-    <div>
-        <input id='serverAddress' type='text' value='http://'></input>
-        <input id='connectButton' type='button' value='connect'></input>
-    </div>
+        Pulse supplies a number of ways to use this information:
 
-    <div id='setup'>
-        <div class='speaker'>
-            <div></div>
+        <dl>
+            <dt><code>pulse.bpm</code></dt>
+            <dd>The currently detected beats per minute.</dd>
+
+            <dt><code>pulse.beat()</code></dt>
+            <dd>This function returns the current beat pluse phase: e.g. 12.4 means that we're about halfway through 
+                the thirteenth beat. Use a modulo of 1 to get only the phase.</dd>
+
+            <dt><code>pulse.pulse()</code></dt>
+            <dd>This convenient function supplies a pulsing value between 0 and 1 that reaches a peak on every whole beat, and 
+                decays after that.</dd>
+        </dl>
+
+        <div id='deck'><div class='edge'><div class='grooves'><div class='image'></div></div></div></div>
+
+        <p>You want to see it in action, don't you? Well, if you are running the server, connect to it below. Oh, you're not? Well
+            you can tap a beat too, but that doesn't tell you much now will it? 
+        </p>
+
+        <div id='inputs'>
+            <input id='serverAddress' type='text' value='http://'></input>
+            <input id='connectButton' type='button' value='connect'></input>
+            <input id='tapButton' type='button' value='tap'></input>
         </div>
-        <div id='deck'>
-            <div></div>
+
+        <div id='demo'>
+            
+            
         </div>
-        <div class='speaker'>
-            <div></div>
-        </div>
-    </div>
 
     </div>
 
 <script>
 
-    pulse.connect('http://localhost:9000', function(devices){
-        console.log(devices);
-        pulse.subscribe(0);
-    });
+
+    $('#tapButton').on('click', function(){
+        pulse.tap();
+    })
+    $('#connectButton').on('click', function(){
+        pulse.connect($('#serverAddress').val());
+    })
 
     function show(){
         // document.getElementById('record').style.transform = 'rotate(' + (pulse.beat() % 1) * 360 + 'deg)';
         var r = 'rotate(' + (pulse.beat() % 4) * 90 + 'deg)';
-        console.log(r);
         $('#deck div').css('transform', r);
-        var s = 20 + 20 * pulse.pulse();
-        $('.speaker div').css('opacity', pulse.pulse());
+        var s = Math.ceil(80 + 20 * pulse.pulse());
+        var si = 100 - s;
+        // $('.speaker div').css('opacity', pulse.pulse());
+        $('.speaker div').css('border-radius', s);
+        $('.speaker div').css('border-width', s);
+        $('.speaker div').css('top', si);
+        $('.speaker div').css('left', si);
+
         setTimeout(show, 10);
     }
     show();
