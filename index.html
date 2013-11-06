@@ -2,7 +2,7 @@
 <head>
 
 <script type="text/javascript" src="http://code.jquery.com/jquery-2.0.3.min.js"></script>
-<script type="text/javascript" src="http://localhost:8000/pulse.js"></script>
+<script type="text/javascript" src="pulse.js"></script>
 
 <!-- <link rel="stylesheet" type="text/css" href="//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/styles/monokai.css"> -->
 <!-- <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js"></script> -->
@@ -37,6 +37,17 @@ code {
    border-radius: 6px;
    background: #222;
    font: 16px 'Lucida Console', Monaco, monospace; 
+}
+
+a {
+    color: #35859c;
+    text-decoration: none;
+    letter-spacing: -1px;
+    font-weight: 900;
+    text-shadow: 1px 1px #555;
+}
+a:hover{
+    color: #4cc0e1;
 }
 #overlay {
     background: white;
@@ -141,7 +152,7 @@ input[type="button"]:active{
 
         <div id='deck'><div class='edge'><div class='grooves'><div class='image'></div></div></div></div>
 
-        <p>You want to see it in action, don't you? Well, if you are running the server, connect to it below. Oh, you're not? You can just tap a beat to see the time tracking in action. Check out the source code to this page to see how the data provided by pulse is used to animate the page. Everything is on GitHub.
+        <p>You want to see it in action, don't you? Well, if you are running the server, connect to it below. Oh, you're not? You can just tap a beat to see the time tracking in action. Check out the source code to this page to see how the data provided by pulse is used to animate the page. Everything is on <a href="http://github.com/noio/pulse">GitHub</a>.
         </p>
 
         <div id='inputs'>
