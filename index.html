@@ -8,7 +8,13 @@
 <!-- <script type="text/javascript" src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/7.3/highlight.min.js"></script> -->
 <link href='http://fonts.googleapis.com/css?family=Vibur|Raleway' rel='stylesheet' type='text/css'>
 <style type="text/css">
+html {
+    margin: 0;
+    padding: 0;
+}
 body { 
+    padding: 0;
+    margin: 0;
     background: linear-gradient(135deg, #dc80ed 0%,#eaba4b 100%);
     font: 16px 'Raleway', Arial, sans-serif;
     color: #333;
@@ -17,7 +23,7 @@ body {
 }
 h1{
     font: 120px 'Vibur',cursive;
-    margin: 20px 0;
+    margin: 0 0 20px;
 }
 strong {
     letter-spacing: -1px;
@@ -32,7 +38,14 @@ code {
    background: #222;
    font: 16px 'Lucida Console', Monaco, monospace; 
 }
-
+#overlay {
+    background: white;
+    width: 100%;
+    height: 100%;
+    position: fixed;
+    z-index: -1;
+    opacity: 0;
+}
 #container {
     width: 680px;
     margin: 0 auto;
@@ -79,20 +92,20 @@ input[type="button"]:active{
     float: left;
 }
 #deck {
-    width: 200px; height: 200px;
+    width: 120px; height: 120px;
     float: right;
-    padding: 10px;
+    padding: 10px 20px;
 }
 #deck .grooves {
     background: black;
-    border: 4px dashed #333;
-    border-radius: 100px;
+    border: 4px dashed #666;
+    border-radius: 60px;
 }
 #deck .image {
-    margin: 46px;
-    width: 100px; height: 100px;
-    background: url('http://placekitten.com/125/125');
-    border-radius: 50px;
+    margin: 26px;
+    width: 60px; height: 60px;
+    background: url('http://placekitten.com/61/61');
+    border-radius: 30px;
 }
 
 </style>
@@ -101,6 +114,7 @@ input[type="button"]:active{
 
 
 <body>
+    <div id='overlay'></div>
     <div id='container'>
         <h1>pulse</h1>
         <p><strong>pulse</strong> is a small node.js server and client that pipes <strong>MIDI Clock</strong> 
@@ -127,8 +141,7 @@ input[type="button"]:active{
 
         <div id='deck'><div class='edge'><div class='grooves'><div class='image'></div></div></div></div>
 
-        <p>You want to see it in action, don't you? Well, if you are running the server, connect to it below. Oh, you're not? Well
-            you can tap a beat too, but that doesn't tell you much now will it? 
+        <p>You want to see it in action, don't you? Well, if you are running the server, connect to it below. Oh, you're not? You can just tap a beat to see the time tracking in action. Check out the source code to this page to see how the data provided by pulse is used to animate the page. Everything is on GitHub.
         </p>
 
         <div id='inputs'>
@@ -156,16 +169,9 @@ input[type="button"]:active{
 
     function show(){
         // document.getElementById('record').style.transform = 'rotate(' + (pulse.beat() % 1) * 360 + 'deg)';
-        var r = 'rotate(' + (pulse.beat() % 4) * 90 + 'deg)';
+        var r = 'rotate(' + (pulse.beat() % 8) * 45 + 'deg)';
         $('#deck div').css('transform', r);
-        var s = Math.ceil(80 + 20 * pulse.pulse());
-        var si = 100 - s;
-        // $('.speaker div').css('opacity', pulse.pulse());
-        $('.speaker div').css('border-radius', s);
-        $('.speaker div').css('border-width', s);
-        $('.speaker div').css('top', si);
-        $('.speaker div').css('left', si);
-
+        $('#overlay').css('opacity', pulse.pulse())
         setTimeout(show, 10);
     }
     show();
