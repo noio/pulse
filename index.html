@@ -25,6 +25,13 @@ h1{
     font: 120px 'Vibur',cursive;
     margin: 0 0 20px;
 }
+h3{
+    font-size: 26px;
+    letter-spacing: -1px;
+    font-weight: 900;
+    text-shadow: 1px 1px #555;
+    margin-bottom: 3px;
+}
 strong {
     letter-spacing: -1px;
     font-weight: 900;
@@ -130,12 +137,24 @@ input[type="button"]:active{
         <h1>pulse</h1>
         <p><strong>pulse</strong> is a small node.js server and client that pipes <strong>MIDI Clock</strong> 
             messages to your browser through a WebSocket. It also  interpolates the <em>bpm</em> and current 
-            <em>phase</em>. Simply run the server and use:
+            <em>phase</em>. This means you pick up the beat from a drumcomputer, a DAW or DJ software, and use 
+            this information to sync up all sorts of cool stuff in a browser!
         </p>
+
+        <h3>Installation</h3>
+
+        <p>Grab the code from <a href="http://github.com/noio/pulse">GitHub</a>. To run the server you'll need 
+            <a href="http://nodejs.org/">node.js</a> using <a href="https://npmjs.org/package/midi.io">midi</a> and 
+            <a href="https://npmjs.org/package/socket.io">socket.io</a>. The client is pure JavaScript. 
+        </p>
+
+        <h3>Usage</h3>
 
         <pre><code>pulse.connect('http://yourserver:9000'); </code></pre>
 
-        Pulse supplies a number of ways to use this information:
+        <p>This will sync up pulse to the MIDI Clock provided by the server. You have a number of ways to use this 
+        information:
+        </p>
 
         <dl>
             <dt><code>pulse.bpm</code></dt>
