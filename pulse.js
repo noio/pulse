@@ -1,3 +1,8 @@
+/*!
+  * Pulse - beat tracking from MIDI Clock
+  * https://github.com/noio/pulse
+  * MIT License | (c) Thomas "noio" van den Berg 2013
+  */
 var pulse = function(module){
 
 	module.MIDI_CLOCK = 248;
@@ -13,6 +18,9 @@ var pulse = function(module){
 	var clocks = 0;
 	var latest = 0;
 
+	/**
+	 * Handles the incoming MIDI clock messages.
+	 */
 	function clock(){
 		if (clocks == 0){
 			module.tap()
@@ -23,12 +31,19 @@ var pulse = function(module){
 		}
 	}
 
+	/**
+	 * Handles the midi start event,
+	 * which basically resets the PPQN counter to 0
+	 */
 	function sync(){
 		console.log('Synced.')
 		clocks = 0;
 		latest = 0;
 	}
 
+	/**
+	 * This is fired every "whole" beat, and updates the BPM
+	 */
 	module.tap = function(){
 		var now = (new Date).getTime();
 		if (now - module.beats[module.beats.length - 1] > module.TAP_TIMEOUT * module.mspb) {
@@ -63,7 +78,6 @@ var pulse = function(module){
 
 	/**
 	* Connect to a pulse server, get the socket.io script
-	* and list its devices.
 	*/
 	module.connect = function(server, callback){
 		if (socket){
