@@ -17,6 +17,7 @@ var pulse = function(module){
 		this.mspb = 600; 
 		
 		this.socket = null;
+		this.address = null;
 		this.clocks = 0;
 		this.latest = 0;
 
@@ -101,10 +102,17 @@ var pulse = function(module){
 		script.src = address + '/socket.io/socket.io.js';
 		
 		self = this;
-		script.onload = function () {	
+		script.onload = function () {
     		self.socket = io.connect(address);
-    		// TODO Set address when succesfully connected,
-    		// and handle failure.
+    		self.socket.on('connect', function(){
+			   	this.address = address;
+			});
+    		
+    		self.socket.on('connect_failed', function(){
+    			this.socket = null;
+    			throw "Failed to connect to MIDI Socket.";
+    		});
+
   			self.socket.on('midi', function (data) {
 	    		if (data == module.MIDI_CLOCK){
 	    			self.clock();
@@ -125,6 +133,7 @@ var pulse = function(module){
 		if (this.socket){
 			this.socket.disconnect();
 			this.socket = null;
+			this.address = null;
 		}
 	}
 

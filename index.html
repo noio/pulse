@@ -152,6 +152,13 @@ input[type="button"]:active{
 
         <h3>Usage</h3>
 
+        You should run the server from a machine that has a real or virtual MIDI device connected (e.g. a drum computer, DJ software
+        or DAW). To get a list of available devices, simply run:
+
+        <pre><code>node pulserver.js</code></pre>
+
+        Then connect to one of them using by providing the device index on the command line. Once you're running the server, you can connect to it from the browser:
+
         <pre><code>pc = new pulse.PulseClient('http://yourserver:9000'); </code></pre>
 
         <p>This will sync up pulse to the MIDI Clock provided by the server. You have a number of ways to use this 
