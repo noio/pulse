@@ -1,5 +1,6 @@
 /*!
   * Pulse - beat tracking from MIDI Clock
+  * v0.1.1
   * https://github.com/noio/pulse
   * MIT License | (c) Thomas "noio" van den Berg 2013
   */
@@ -9,25 +10,34 @@ var pulse = function(module){
 	module.MIDI_START = 250;
 	module.PPQN = 24;
 	module.TAP_TIMEOUT = 20;
+
+	function PulseClient(address) {
+		this.beats = [];
+		this.bpm = 120;
+		this.mspb = 600; 
+		
+		this.socket = null;
+		this.clocks = 0;
+		this.latest = 0;
+
+		this.deviceLatency = 0;
+		this.netLatency = 0;	
+
+		if (address){
+			this.connect(address);
+		}
+	}
 	
-	module.beats = [];
-	module.bpm = 120;
-	module.mspb = 600; 
-
-	var socket = null;
-	var clocks = 0;
-	var latest = 0;
-
 	/**
 	 * Handles the incoming MIDI clock messages.
 	 */
-	function clock(){
-		if (clocks == 0){
-			module.tap()
+	PulseClient.prototype.clock = function(){
+		if (this.clocks == 0){
+			this.tap()
 		}
-		clocks ++;
-		if (clocks == module.PPQN){
-			clocks = 0;
+		this.clocks ++;
+		if (this.clocks == module.PPQN){
+			this.clocks = 0;
 		}
 	}
 
@@ -35,66 +45,72 @@ var pulse = function(module){
 	 * Handles the midi start event,
 	 * which basically resets the PPQN counter to 0
 	 */
-	function sync(){
-		console.log('Synced.')
-		clocks = 0;
-		latest = 0;
+	PulseClient.prototype.sync = function(){
+		console.log('MIDI Synced.')
+		this.clocks = 0;
+		this.latest = 0;
 	}
+
 
 	/**
 	 * This is fired every "whole" beat, and updates the BPM
 	 */
-	module.tap = function(){
+	PulseClient.prototype.tap = function(){
 		var now = (new Date).getTime();
-		if (now - module.beats[module.beats.length - 1] > module.TAP_TIMEOUT * module.mspb) {
-			module.beats = []
+		if (now - this.beats[this.beats.length - 1] > module.TAP_TIMEOUT * this.mspb) {
+			this.beats = []
 		}
-		module.beats.push(now);
-		console.log(module.beats)
-		if (module.beats.length > 1){
-			if (module.beats.length >= 4){
-				module.beats.shift()
+		this.beats.push(now);
+		if (this.beats.length > 1){
+			if (this.beats.length >= 4){
+				this.beats.shift()
 			}
-			module.mspb = (module.beats[module.beats.length-1] - module.beats[0]) / (module.beats.length-1);
+			this.mspb = (this.beats[this.beats.length-1] - this.beats[0]) / (this.beats.length-1);
 			// convert 'milliseconds per beats to 'beats per minute'
-			module.bpm = 60000 / module.mspb;
+			this.bpm = 60000 / this.mspb;
 		}
-		latest = Math.round(latest) + 1;
+		this.latest = Math.round(this.latest) + 1;
 	}
 
 	/**
 	* Get the current beat
 	*/
-	module.beat = function(){
-		return latest + ((new Date).getTime() - module.beats[module.beats.length-1]) / module.mspb;
+	PulseClient.prototype.beat = function(){
+		return this.latest + ((new Date).getTime() - this.beats[this.beats.length-1]) / this.mspb;
 	}
 
 	/**
 	* Get a pulse on the beat
 	*/
-	module.pulse = function(){
-		return Math.exp(-Math.pow( Math.pow(module.beat() % 1, 0.3) - 0.5, 2) / 0.05)
+	PulseClient.prototype.pulse = function(){
+		return Math.exp(-Math.pow( Math.pow(this.beat() % 1, 0.3) - 0.5, 2) / 0.05)
 	}
 
 	/**
 	* Connect to a pulse server, get the socket.io script
 	*/
-	module.connect = function(server, callback){
-		if (socket){
-			module.disconnect();
+	PulseClient.prototype.connect = function(address){
+		if (this.socket){
+			this.disconnect();
 		}
+		if (!address.indexOf('http') == 0){
+			address =  'http://' + address;
+		}
+
 		var script = document.createElement('script');
-		script.src = server + '/socket.io/socket.io.js';
-		console.log(script)
+		script.src = address + '/socket.io/socket.io.js';
 		
+		self = this;
 		script.onload = function () {	
-    		socket = io.connect(server);
-  			socket.on('midi', function (data) {
+    		self.socket = io.connect(address);
+    		// TODO Set address when succesfully connected,
+    		// and handle failure.
+  			self.socket.on('midi', function (data) {
 	    		if (data == module.MIDI_CLOCK){
-	    			clock();
+	    			self.clock();
 	    		}
 	    		else if (data == module.MIDI_START){
-	    			sync();
+	    			self.sync();
 	    		}
   			});
 		};
@@ -103,15 +119,16 @@ var pulse = function(module){
 	}
 
 	/**
-	* Disconnect from the pulse server
+	* Disconnect from the pulse address
 	*/
-	module.disconnect = function(){
-		if (socket){
-			socket.disconnect();
-			socket = null;
+	PulseClient.prototype.disconnect = function(){
+		if (this.socket){
+			this.socket.disconnect();
+			this.socket = null;
 		}
 	}
 
+	module.PulseClient = PulseClient;
 	return module;
 
 }({})
