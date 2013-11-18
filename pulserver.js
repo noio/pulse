@@ -47,6 +47,10 @@ if (process.argv.length < 4){
 			console.log("Disconnected: " + reason);
 			input.removeListener('message', midiReceived);
 		});
+
+		socket.on('ping', function(){
+			socket.emit('pong');
+		});
 	});
 
 }
