@@ -34,6 +34,8 @@ var Pulse = function(module){
 	Pulse.TAP_TIMEOUT = 20;
 	Pulse.MAX_NET_LATENCY = 150;
 	Pulse.PING_INTERVAL = 10000;
+	Pulse.VALID_IP = /^(http:\/\/)?(([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])\.){3}([0-9]|[1-9][0-9]|1[0-9]{2}|2[0-4][0-9]|25[0-5])(:[0-9]+)?$/;
+	Pulse.VALID_HOSTNAME = /^(http:\/\/)?(([a-zA-Z0-9]|[a-zA-Z0-9][a-zA-Z0-9\-]*[a-zA-Z0-9])\.)*([A-Za-z0-9]|[A-Za-z0-9][A-Za-z0-9\-]*[A-Za-z0-9])(:[0-9]+)?$/;
 	
 	/**
 	 * Handles the incoming MIDI clock messages.
@@ -122,6 +124,10 @@ var Pulse = function(module){
 	Pulse.prototype.connect = function(address){
 		address = this.cleanAddress(address);
 
+		if (!(address.match(Pulse.VALID_HOSTNAME) || address.match(Pulse.VALID_IP))){
+			throw "ConnectionError: Not a valid address (" + address + ")."
+		}
+
 		if (this.currentConnection() === address) {
 			throw "ConnectionError: Already connected to that address."
 		}
@@ -155,13 +161,12 @@ var Pulse = function(module){
 
 	Pulse.prototype.connectSocket = function(address){
 		var self = this;
-		console.log(this.socket);
 		this.socket = io.connect(address);
-		console.log(this.socket);
 		this.connecting = true;
 		// Handle connect
 		this.socket.on('connect', function(){
 		   	this.address = address;
+			console.log('Connected to ' + address);
 		   	this.pingTimer = setInterval(function(){self.ping()}, Pulse.PING_INTERVAL);
 		   	this.connecting = false;
 		}.bind(this));
@@ -187,7 +192,7 @@ var Pulse = function(module){
 		this.socket.on('pong', function(data){
 			var latency = Math.min(Pulse.MAX_NET_LATENCY, ((new Date).getTime() - this.lastPing) / 2);
 			this.netLatency = this.netLatency * 0.8 + latency * 0.2;
-			console.log("Latency: " + this.netLatency)
+			console.log("Pulse Latency: " + this.netLatency.toFixed(1) + 'ms')
 		}.bind(this));
 	}
 
