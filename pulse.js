@@ -1,19 +1,12 @@
 /*!
   * Pulse - beat tracking from MIDI Clock
-  * v0.1.2
+  * v0.1.3
   * https://github.com/noio/pulse
   * MIT License | (c) Thomas "noio" van den Berg 2013
   */
-var pulse = function(module){
+var Pulse = function(){
 
-	module.MIDI_CLOCK = 248;
-	module.MIDI_START = 250;
-	module.PPQN = 24;
-	module.TAP_TIMEOUT = 20;
-	module.MAX_NET_LATENCY = 150;
-	module.PING_INTERVAL = 10000;
-
-	function PulseClient(address) {
+	function Pulse(address) {
 		this.beats = [];
 		this.bpm = 120;
 		this.mspb = 600; 
@@ -32,16 +25,24 @@ var pulse = function(module){
 			this.connect(address);
 		}
 	}
+
+	// Static properties
+	Pulse.MIDI_CLOCK = 248;
+	Pulse.MIDI_START = 250;
+	Pulse.PPQN = 24;
+	Pulse.TAP_TIMEOUT = 20;
+	Pulse.MAX_NET_LATENCY = 150;
+	Pulse.PING_INTERVAL = 10000;
 	
 	/**
 	 * Handles the incoming MIDI clock messages.
 	 */
-	PulseClient.prototype.clock = function(){
+	Pulse.prototype.clock = function(){
 		if (this.clocks == 0){
 			this.tap()
 		}
 		this.clocks ++;
-		if (this.clocks == module.PPQN){
+		if (this.clocks == Pulse.PPQN){
 			this.clocks = 0;
 		}
 	}
@@ -50,7 +51,7 @@ var pulse = function(module){
 	 * Handles the midi start event,
 	 * which basically resets the PPQN counter to 0
 	 */
-	PulseClient.prototype.sync = function(){
+	Pulse.prototype.sync = function(){
 		console.log('MIDI Synced.')
 		this.clocks = 0;
 		this.latest = 0;
@@ -60,9 +61,9 @@ var pulse = function(module){
 	/**
 	 * This is fired every "whole" beat, and updates the BPM
 	 */
-	PulseClient.prototype.tap = function(){
+	Pulse.prototype.tap = function(){
 		var now = (new Date).getTime();
-		if (now - this.beats[this.beats.length - 1] > module.TAP_TIMEOUT * this.mspb) {
+		if (now - this.beats[this.beats.length - 1] > Pulse.TAP_TIMEOUT * this.mspb) {
 			this.beats = []
 		}
 		this.beats.push(now);
@@ -80,7 +81,7 @@ var pulse = function(module){
 	/**
 	* Get the current beat
 	*/
-	PulseClient.prototype.beat = function(){
+	Pulse.prototype.beat = function(){
 		var passed = (new Date).getTime() - this.beats[this.beats.length-1];
 		return this.latest + (passed + this.netLatency + this.deviceLatency) / this.mspb;
 	}
@@ -88,19 +89,40 @@ var pulse = function(module){
 	/**
 	* Get a pulse on the beat
 	*/
-	PulseClient.prototype.pulse = function(){
+	Pulse.prototype.pulse = function(){
 		return Math.exp(-Math.pow( Math.pow(this.beat() % 1, 0.3) - 0.5, 2) / 0.05)
+	}
+
+	/*
+	* Return the address of the current connection,
+	* or 'null' if not connected.
+	*/
+	Pulse.prototype.currentConnection = function(){
+		if (this.socket){
+			return this.address;
+		} else {
+			return null;
+		}
+	}
+
+	/**
+	* Cleans an address (prepend http)
+	*/
+	Pulse.prototype.cleanAddress = function(address){
+		if (!address.indexOf('http') == 0){
+			address =  'http://' + address;
+		}
+		return address;
 	}
 
 	/**
 	* Connect to a pulse server, get the socket.io script
 	*/
-	PulseClient.prototype.connect = function(address){
+	Pulse.prototype.connect = function(address){
+		address = this.cleanAddress(address);
+
 		if (this.socket){
 			this.disconnect();
-		}
-		if (!address.indexOf('http') == 0){
-			address =  'http://' + address;
 		}
 
 		if (typeof io !== 'undefined'){
@@ -113,18 +135,17 @@ var pulse = function(module){
 			script.onload = function () {
 				self.connectSocket(address);
 			};
+			document.head.appendChild(script);
 		}
-
-		document.head.appendChild(script);
 	}
 
-	PulseClient.prototype.connectSocket = function(address){
+	Pulse.prototype.connectSocket = function(address){
 		var self = this;
 		this.socket = io.connect(address);
 		// Handle connect
 		this.socket.on('connect', function(){
 		   	this.address = address;
-		   	this.pingTimer = setInterval(function(){self.ping()}, module.PING_INTERVAL);
+		   	this.pingTimer = setInterval(function(){self.ping()}, Pulse.PING_INTERVAL);
 		}.bind(this));
 		
 		// Handle connection failure
@@ -135,23 +156,23 @@ var pulse = function(module){
 
 		// Handle incoming midi
 		this.socket.on('midi', function (data) {
-    		if (data == module.MIDI_CLOCK){
+    		if (data == Pulse.MIDI_CLOCK){
     			this.clock();
     		}
-    		else if (data == module.MIDI_START){
+    		else if (data == Pulse.MIDI_START){
     			this.sync();
     		}
 		}.bind(this));
 
 		// Set the network latency when a pong is received. 
 		this.socket.on('pong', function(data){
-			var latency = Math.min(module.MAX_NET_LATENCY, ((new Date).getTime() - this.lastPing) / 2);
+			var latency = Math.min(Pulse.MAX_NET_LATENCY, ((new Date).getTime() - this.lastPing) / 2);
 			this.netLatency = this.netLatency * 0.8 + latency * 0.2;
 			console.log("Latency: " + this.netLatency)
 		}.bind(this));
 	}
 
-	PulseClient.prototype.ping = function(){
+	Pulse.prototype.ping = function(){
 		if (this.socket){
 			this.lastPing = (new Date).getTime();
 			this.socket.emit('ping');
@@ -161,7 +182,7 @@ var pulse = function(module){
 	/**
 	* Disconnect from the pulse address
 	*/
-	PulseClient.prototype.disconnect = function(){
+	Pulse.prototype.disconnect = function(){
 		if (this.socket){
 			this.socket.disconnect();
 			this.socket = null;
@@ -169,7 +190,6 @@ var pulse = function(module){
 		}
 	}
 
-	module.PulseClient = PulseClient;
-	return module;
+	return Pulse;
 
-}({})
+}()

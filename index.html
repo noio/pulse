@@ -159,21 +159,21 @@ input[type="button"]:active{
 
         Then connect to one of them using by providing the device index on the command line. Once you're running the server, you can connect to it from the browser:
 
-        <pre><code>pc = new pulse.PulseClient('http://yourserver:9000'); </code></pre>
+        <pre><code>pulse = new Pulse('http://yourserver:9000'); </code></pre>
 
         <p>This will sync up pulse to the MIDI Clock provided by the server. You have a number of ways to use this 
         information:
         </p>
 
         <dl>
-            <dt><code>pc.bpm</code></dt>
+            <dt><code>pulse.bpm</code></dt>
             <dd>The currently detected beats per minute.</dd>
 
-            <dt><code>pc.beat()</code></dt>
+            <dt><code>pulse.beat()</code></dt>
             <dd>This function returns the current beat plus phase: e.g. 12.4 means that we're about halfway through 
                 the thirteenth beat. Use a modulo of 1 to get only the phase.</dd>
 
-            <dt><code>pc.pulse()</code></dt>
+            <dt><code>pulse.pulse()</code></dt>
             <dd>This convenient function supplies a pulsing value between 0 and 1 that reaches a peak on every whole beat, and 
                 decays after that.</dd>
         </dl>
@@ -198,20 +198,20 @@ input[type="button"]:active{
 
 <script>
     
-    var pc = new pulse.PulseClient();
+    var pulse = new Pulse();
 
     $('#tapButton').on('click', function(){
-        pc.tap();
+        pulse.tap();
     })
     $('#connectButton').on('click', function(){
-        pc.connect($('#serverAddress').val());
+        pulse.connect($('#serverAddress').val());
     })
 
     function show(){
         // document.getElementById('record').style.transform = 'rotate(' + (pulse.beat() % 1) * 360 + 'deg)';
         // var r = 'rotate(' + (pulse.beat() % 8) * 45 + 'deg)';
         // $('#deck div').css('transform', r);
-        $('#overlay').css('opacity', pc.pulse() * 0.8)
+        $('#overlay').css('opacity', pulse.pulse() * 0.8)
         setTimeout(show, 10);
     }
     show();
