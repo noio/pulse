@@ -208,13 +208,13 @@ input[type="button"]:active{
     })
 
     $("#serverAddress").keypress(function(event) {
-    if (event.which == 13) {
-        event.preventDefault();
-        pulse.connect($('#serverAddress').val());
-    }
-
+        if (event.which == 13) {
+            event.preventDefault();
+            pulse.connect($('#serverAddress').val());
+        }
+    });
+    
     $("#serverAddress").focus();
-});
 
     function show(){
         // document.getElementById('record').style.transform = 'rotate(' + (pulse.beat() % 1) * 360 + 'deg)';

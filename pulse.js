@@ -4,7 +4,7 @@
   * https://github.com/noio/pulse
   * MIT License | (c) Thomas "noio" van den Berg 2013
   */
-var Pulse = function(){
+var Pulse = function(module){
 
 	function Pulse(address) {
 		this.beats = [];
@@ -121,7 +121,7 @@ var Pulse = function(){
 	*/
 	Pulse.prototype.connect = function(address){
 		address = this.cleanAddress(address);
-		
+
 		if (this.currentConnection() === address) {
 			throw "ConnectionError: Already connected to that address."
 		}
@@ -137,6 +137,11 @@ var Pulse = function(){
 		if (typeof io !== 'undefined'){
 			self.connectSocket(address)
 		} else {
+			this.connecting = true;
+			var self = this;
+			setTimeout(function(){
+				self.connecting = false;
+			}, 5000);
 			var script = document.createElement('script');
 			script.src = address + '/socket.io/socket.io.js';
 			
@@ -208,4 +213,4 @@ var Pulse = function(){
 
 	return Pulse;
 
-}()
+}({})
