@@ -207,6 +207,15 @@ input[type="button"]:active{
         pulse.connect($('#serverAddress').val());
     })
 
+    $("#serverAddress").keypress(function(event) {
+    if (event.which == 13) {
+        event.preventDefault();
+        pulse.connect($('#serverAddress').val());
+    }
+
+    $("#serverAddress").focus();
+});
+
     function show(){
         // document.getElementById('record').style.transform = 'rotate(' + (pulse.beat() % 1) * 360 + 'deg)';
         // var r = 'rotate(' + (pulse.beat() % 8) * 45 + 'deg)';

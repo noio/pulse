@@ -34,6 +34,7 @@ if (process.argv.length < 4){
 
 	io = io.listen(port);
 	io.sockets.on('connection', function (socket) {
+		console.log("Client connected.");
 
 		var midiReceived = function(deltaTime, message){
 			socket.emit('midi', message);

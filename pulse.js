@@ -13,6 +13,7 @@ var Pulse = function(){
 		
 		this.socket = null;
 		this.address = null;
+		this.connecting = false;
 		this.clocks = 0;
 		this.latest = 0;
 
@@ -120,6 +121,14 @@ var Pulse = function(){
 	*/
 	Pulse.prototype.connect = function(address){
 		address = this.cleanAddress(address);
+		
+		if (this.currentConnection() === address) {
+			throw "ConnectionError: Already connected to that address."
+		}
+
+		if (this.connecting){
+			throw "ConnectionError: Still attempting connection."
+		}
 
 		if (this.socket){
 			this.disconnect();
@@ -141,16 +150,21 @@ var Pulse = function(){
 
 	Pulse.prototype.connectSocket = function(address){
 		var self = this;
+		console.log(this.socket);
 		this.socket = io.connect(address);
+		console.log(this.socket);
+		this.connecting = true;
 		// Handle connect
 		this.socket.on('connect', function(){
 		   	this.address = address;
 		   	this.pingTimer = setInterval(function(){self.ping()}, Pulse.PING_INTERVAL);
+		   	this.connecting = false;
 		}.bind(this));
 		
 		// Handle connection failure
 		this.socket.on('connect_failed', function(){
 			this.socket = null;
+			this.connecting = false;
 			throw "Failed to connect to MIDI Socket.";
 		}.bind(this));
 
@@ -187,7 +201,9 @@ var Pulse = function(){
 			this.socket.disconnect();
 			this.socket = null;
 			this.address = null;
+			this.connecting = false;
 		}
+		clearInterval(this.pingTimer);
 	}
 
 	return Pulse;
