@@ -141,18 +141,22 @@ var Pulse = function(module){
 	* Connect to a pulse server, get the socket.io script
 	*/
 	Pulse.prototype.connect = function(address){
+		if (typeof address == 'undefined') {
+			throw "No address."
+		}
+
 		address = this.cleanAddress(address);
 
 		if (!(address.match(Pulse.VALID_HOSTNAME) || address.match(Pulse.VALID_IP))){
-			throw "ConnectionError: Not a valid address (" + address + ")."
+			throw "Not a valid address (" + address + ")."
 		}
 
 		if (this.currentConnection() === address) {
-			throw "ConnectionError: Already connected to that address."
+			throw "Already connected to that address."
 		}
 
 		if (this.connecting){
-			throw "ConnectionError: Still attempting connection."
+			throw "Still attempting connection."
 		}
 
 		if (this.socket){
