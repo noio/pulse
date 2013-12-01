@@ -1,6 +1,6 @@
 /*!
   * Pulse - beat tracking from MIDI Clock
-  * v0.1.3
+  * v0.1.4
   * https://github.com/noio/pulse
   * MIT License | (c) Thomas "noio" van den Berg 2013
   */
