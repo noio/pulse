@@ -1,6 +1,10 @@
 var midi = require('midi');
 var io = require('socket.io');
 
+var CLOCK_PPQN_SEND = 4;
+var MIDI_CLOCK = 248;
+var clockCount = 0;
+
 
 // Set up a new input.
 var input = new midi.input();
@@ -37,7 +41,19 @@ if (process.argv.length < 4){
 		console.log("Client connected.");
 
 		var midiReceived = function(deltaTime, message){
-			socket.emit('midi', message);
+			// Throttle the number of clock messages sent.
+			// The midi standard of 24 pulses-per-quarter-note 
+			// (e.g. 120*24 = 2880 messages per second @ 12bpm) is a
+			// little high to pump through a web socket.
+			if (message == MIDI_CLOCK){
+				if (clockCount % CLOCK_PPQN_SEND == 0){
+					socket.emit('midi', message);	
+					clockCount = 0;
+				}
+				clockCount ++;
+			} else {
+				socket.emit('midi', message);
+			}
 		}
 
 		input.openPort(deviceID);

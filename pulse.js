@@ -1,6 +1,6 @@
 /*!
   * Pulse - beat tracking from MIDI Clock
-  * v0.1.4
+  * v0.1.5
   * https://github.com/noio/pulse
   * MIT License | (c) Thomas "noio" van den Berg 2013
   */
@@ -30,7 +30,7 @@ var Pulse = function(module){
 	// Static properties
 	Pulse.MIDI_CLOCK = 248;
 	Pulse.MIDI_START = 250;
-	Pulse.PPQN = 24;
+	Pulse.PPQN = 4;
 	Pulse.TAP_TIMEOUT = 20;
 	Pulse.MAX_NET_LATENCY = 150;
 	Pulse.PING_INTERVAL = 10000;
@@ -141,6 +141,8 @@ var Pulse = function(module){
 	* Connect to a pulse server, get the socket.io script
 	*/
 	Pulse.prototype.connect = function(address){
+		var _this = this;
+
 		if (typeof address == 'undefined') {
 			throw "No address."
 		}
@@ -164,59 +166,65 @@ var Pulse = function(module){
 		}
 
 		if (typeof io !== 'undefined'){
-			self.connectSocket(address)
+			this.connectSocket(address)
 		} else {
 			this.connecting = true;
-			var self = this;
 			setTimeout(function(){
-				self.connecting = false;
+				_this.connecting = false;
 			}, 5000);
 			var script = document.createElement('script');
 			script.src = address + '/socket.io/socket.io.js';
 			
-			self = this;
 			script.onload = function () {
-				self.connectSocket(address);
+				_this.connectSocket(address);
 			};
 			document.head.appendChild(script);
 		}
 	}
 
 	Pulse.prototype.connectSocket = function(address){
-		var self = this;
-		this.socket = io.connect(address);
+		var _this = this;
+		this.socket = io.connect(address, {'force new connection': true });
 		this.connecting = true;
+		setTimeout(function(){
+			_this.connecting = false;
+		}, 5000);
+
+		console.log(this.socket)
+		
 		// Handle connect
 		this.socket.on('connect', function(){
-		   	this.address = address;
+		   	_this.address = address;
 			console.log('Connected to ' + address);
-		   	this.pingTimer = setInterval(function(){self.ping()}, Pulse.PING_INTERVAL);
-		   	this.connecting = false;
-		}.bind(this));
+		   	_this.pingTimer = setInterval(function(){_this.ping()}, Pulse.PING_INTERVAL);
+		   	_this.connecting = false;
+		});
 		
 		// Handle connection failure
 		this.socket.on('connect_failed', function(){
-			this.socket = null;
-			this.connecting = false;
+			_this.socket = null;
+			_this.connecting = false;
 			throw "Failed to connect to MIDI Socket.";
-		}.bind(this));
+		});
 
 		// Handle incoming midi
 		this.socket.on('midi', function (data) {
     		if (data == Pulse.MIDI_CLOCK){
-    			this.clock();
+    			_this.clock();
     		}
     		else if (data == Pulse.MIDI_START){
-    			this.sync();
+    			_this.sync();
     		}
-		}.bind(this));
+		});
 
 		// Set the network latency when a pong is received. 
 		this.socket.on('pong', function(data){
-			var latency = Math.min(Pulse.MAX_NET_LATENCY, ((new Date).getTime() - this.lastPing) / 2);
-			this.netLatency = this.netLatency * 0.8 + latency * 0.2;
-			console.log("Pulse Latency: " + this.netLatency.toFixed(1) + 'ms')
-		}.bind(this));
+			var latency = Math.min(Pulse.MAX_NET_LATENCY, ((new Date).getTime() - _this.lastPing) / 2);
+			_this.netLatency = _this.netLatency * 0.8 + latency * 0.2;
+			console.log("Pulse Latency: " + _this.netLatency.toFixed(1) + 'ms')
+		});
+
+
 	}
 
 	Pulse.prototype.ping = function(){
