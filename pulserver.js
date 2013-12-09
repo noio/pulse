@@ -1,7 +1,8 @@
 var midi = require('midi');
-var io = require('socket.io');
+var socketio = require('socket.io');
 
-var CLOCK_PPQN_SEND = 4;
+var MIDI_PPQN = 24
+var SOCKET_PPQN = 4;
 var MIDI_CLOCK = 248;
 var clockCount = 0;
 
@@ -36,38 +37,38 @@ if (process.argv.length < 4){
 	}
 	console.log("Listening to device " + deviceID + ": " + devices[deviceID])
 
-	io = io.listen(port);
+	io = socketio.listen(port);
 	io.sockets.on('connection', function (socket) {
 		console.log("Client connected.");
 
-		var midiReceived = function(deltaTime, message){
-			// Throttle the number of clock messages sent.
-			// The midi standard of 24 pulses-per-quarter-note 
-			// (e.g. 120*24 = 2880 messages per second @ 12bpm) is a
-			// little high to pump through a web socket.
-			if (message == MIDI_CLOCK){
-				if (clockCount % CLOCK_PPQN_SEND == 0){
-					socket.emit('midi', message);	
-					clockCount = 0;
-				}
-				clockCount ++;
-			} else {
-				socket.emit('midi', message);
-			}
-		}
-
-		input.openPort(deviceID);
-		input.ignoreTypes(false, false, false);
-		input.on('message', midiReceived);	
-
 		socket.on('disconnect', function(reason){
 			console.log("Disconnected: " + reason);
-			input.removeListener('message', midiReceived);
 		});
 
 		socket.on('ping', function(){
 			socket.emit('pong');
 		});
 	});
+
+
+	var midiReceived = function(deltaTime, message){
+		// Throttle the number of clock messages sent.
+		// The midi standard of 24 pulses-per-quarter-note 
+		// (e.g. 120*24 = 2880 messages per second @ 12bpm) is a
+		// little high to pump through a web socket.
+		if (message == MIDI_CLOCK){
+			if (clockCount % (MIDI_PPQN/SOCKET_PPQN) == 0){
+				io.sockets.emit('midi', message);	
+				clockCount = 0;
+			}
+			clockCount ++;
+		} else {
+			io.sockets.emit('midi', message);
+		}
+	}
+
+	input.openPort(deviceID);
+	input.ignoreTypes(false, false, false);
+	input.on('message', midiReceived);	
 
 }

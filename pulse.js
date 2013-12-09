@@ -1,6 +1,6 @@
 /*!
   * Pulse - beat tracking from MIDI Clock
-  * v0.1.5
+  * v0.1.6
   * https://github.com/noio/pulse
   * MIT License | (c) Thomas "noio" van den Berg 2013
   */
@@ -41,14 +41,12 @@ var Pulse = function(module){
 	* Handles the incoming MIDI clock messages.
 	*/
 	Pulse.prototype.clock = function(){
-		if (this.clocks == 0){
-			var beatTime = (new Date).getTime() - this.deviceLatency - this.netLatency;
+		if (this.clocks % Pulse.PPQN == 0){
+			var beatTime = new Date().getTime() - this.deviceLatency - this.netLatency;
 			this.newBeat(beatTime);
-		}
-		this.clocks ++;
-		if (this.clocks == Pulse.PPQN){
 			this.clocks = 0;
 		}
+		this.clocks ++;
 	}
 
 	/**
@@ -67,7 +65,7 @@ var Pulse = function(module){
  	Pulse.prototype.newBeat = function(t){
  		this.beats.push(t);
 		if (this.beats.length > 1){
-			if (this.beats.length >= 4){
+			if (this.beats.length > 4){
 				this.beats.shift()
 			}
 			this.mspb = (this.beats[this.beats.length-1] - this.beats[0]) / (this.beats.length-1);
