@@ -4,6 +4,8 @@ var socketio = require('socket.io');
 var MIDI_PPQN = 24
 var SOCKET_PPQN = 4;
 var MIDI_CLOCK = 248;
+var MIDI_START = 251;
+var MIDI_CONTINUE = 252;
 var clockCount = 0;
 
 
@@ -64,6 +66,9 @@ if (process.argv.length < 4){
 			clockCount ++;
 		} else {
 			io.sockets.emit('midi', message);
+			if (message == MIDI_START || message == MIDI_CONTINUE){
+				clockCount = 0;
+			}
 		}
 	}
 
