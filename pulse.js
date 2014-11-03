@@ -81,7 +81,7 @@ var Pulse = (function(module){
     * This is fired every "whole" beat, and updates the BPM
     */
     Pulse.prototype.tap = function(){
-        var now = (new Date).getTime();
+        var now = new Date().getTime();
         if (now - this.beats[this.beats.length - 1] > Pulse.TAP_TIMEOUT * this.mspb) {
             this.beats = [];
         }
@@ -92,7 +92,7 @@ var Pulse = (function(module){
     * Get the current beat
     */
     Pulse.prototype.beat = function(){
-        var passed = (new Date).getTime() - this.beats[this.beats.length-1];
+        var passed = new Date().getTime() - this.beats[this.beats.length-1];
         return this.count + passed / this.mspb;
     };
 
@@ -218,7 +218,7 @@ var Pulse = (function(module){
 
         // Set the network latency when a pong is received.
         this.socket.on('pong', function(data){
-            var latency = Math.min(Pulse.MAX_NET_LATENCY, ((new Date).getTime() - _this.lastPing) / 2);
+            var latency = Math.min(Pulse.MAX_NET_LATENCY, (new Date().getTime() - _this.lastPing) / 2);
             _this.netLatency = _this.netLatency * 0.8 + latency * 0.2;
             console.log("Pulse Latency: " + _this.netLatency.toFixed(1) + 'ms');
         });
@@ -228,7 +228,7 @@ var Pulse = (function(module){
 
     Pulse.prototype.ping = function(){
         if (this.socket){
-            this.lastPing = (new Date).getTime();
+            this.lastPing = new Date().getTime();
             this.socket.emit('ping');
         }
     };
