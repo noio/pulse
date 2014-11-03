@@ -20,8 +20,8 @@ output.sendMessage([250]);
 function beat(){
     output.sendMessage([248]);
 
-    if (count % 48 == 0){ console.log('BOOM! ' + count/24); }
-    if (count % 48 == 24){ console.log("CLAP! " + count/24); }
+    if (count % 48 === 0){ console.log('BOOM! ' + count/24); }
+    if (count % 48 === 24){ console.log("CLAP! " + count/24); }
 
     count ++;
     if (count >= 24 * 16){
