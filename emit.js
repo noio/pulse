@@ -4,7 +4,7 @@ var bpm;
 if (process.argv.length < 3){
     bpm = 123;
 } else {
-    bpm = parseInt(process.argv[2])
+    bpm = parseInt(process.argv[2], 10);
 }
 
 // Set up a new input.
