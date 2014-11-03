@@ -1,9 +1,9 @@
 var midi = require('midi');
 
 if (process.argv.length < 3){
-	bpm = 123;
+    bpm = 123;
 } else {
-	bpm = parseInt(process.argv[2])
+    bpm = parseInt(process.argv[2])
 }
 
 // Set up a new input.
@@ -17,19 +17,19 @@ output.sendMessage([250]);
 
 // Send a MIDI message.
 function beat(){
-	output.sendMessage([248]);
+    output.sendMessage([248]);
 
-	if (count % 48 == 0){ console.log('BOOM! ' + count/24) }
-	if (count % 48 == 24){ console.log("CLAP! " + count/24) }
+    if (count % 48 == 0){ console.log('BOOM! ' + count/24) }
+    if (count % 48 == 24){ console.log("CLAP! " + count/24) }
 
-	count ++;
-	if (count >= 24 * 16){
-		count = 0;
-		output.sendMessage([250]);
-	}
-	var now = new Date().getTime()
-	setTimeout(beat, last + 60000 / bpm / 24 - now);
-	last += 60000 / bpm / 24;
+    count ++;
+    if (count >= 24 * 16){
+        count = 0;
+        output.sendMessage([250]);
+    }
+    var now = new Date().getTime()
+    setTimeout(beat, last + 60000 / bpm / 24 - now);
+    last += 60000 / bpm / 24;
 }
 beat()
 
