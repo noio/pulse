@@ -109,9 +109,8 @@ var Pulse = (function(module){
     Pulse.prototype.timeOfLastBeat = function(){
         if (this.beats.length){
             return this.beats[this.beats.length - 1];
-        } else {
-            return null;
         }
+        return null;
     };
 
     /*
@@ -121,9 +120,8 @@ var Pulse = (function(module){
     Pulse.prototype.currentConnection = function(){
         if (this.socket){
             return this.address;
-        } else {
-            return null;
         }
+        return null;
     };
 
     /**
