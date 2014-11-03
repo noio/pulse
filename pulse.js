@@ -4,7 +4,7 @@
   * https://github.com/noio/pulse
   * MIT License | (c) Thomas "noio" van den Berg 2013
   */
-var Pulse = function(module){
+var Pulse = (function(module){
 
     function Pulse(address) {
         this.beats = [];
@@ -248,4 +248,4 @@ var Pulse = function(module){
 
     return Pulse;
 
-}({});
+}({}));
