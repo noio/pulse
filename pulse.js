@@ -42,7 +42,7 @@ var Pulse = (function(module){
     * Handles the incoming MIDI clock messages.
     */
     Pulse.prototype.clock = function(){
-        if (this.clocks % Pulse.PPQN == 0){
+        if (this.clocks % Pulse.PPQN === 0){
             var beatTime = new Date().getTime() - this.deviceLatency - this.netLatency;
             this.newBeat(beatTime);
             this.clocks = 0;
@@ -130,7 +130,7 @@ var Pulse = (function(module){
     * Cleans an address (prepend http)
     */
     Pulse.prototype.cleanAddress = function(address){
-        if (!address.indexOf('http') == 0){
+        if (address.indexOf('http') !== 0){
             address =  'http://' + address;
         }
         return address;
@@ -142,7 +142,7 @@ var Pulse = (function(module){
     Pulse.prototype.connect = function(address){
         var _this = this;
 
-        if (typeof address == 'undefined') {
+        if (typeof address === 'undefined') {
             throw "No address.";
         }
 
@@ -208,10 +208,10 @@ var Pulse = (function(module){
 
         // Handle incoming midi
         this.socket.on('midi', function (data) {
-            if (data == Pulse.MIDI_CLOCK){
+            if (data === Pulse.MIDI_CLOCK){
                 _this.clock();
             }
-            else if (data == Pulse.MIDI_START || data == Pulse.MIDI_CONTINUE){
+            else if (data === Pulse.MIDI_START || data === Pulse.MIDI_CONTINUE){
                 _this.sync();
             }
         });
