@@ -1,3 +1,6 @@
+/*jslint browser: true */
+/*global io */
+
 /*!
   * Pulse - beat tracking from MIDI Clock
   * v0.1.7
