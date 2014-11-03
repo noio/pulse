@@ -1,5 +1,6 @@
 var midi = require('midi');
 
+var bpm;
 if (process.argv.length < 3){
     bpm = 123;
 } else {
