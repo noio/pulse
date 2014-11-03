@@ -1,7 +1,7 @@
 var midi = require('midi');
 var socketio = require('socket.io');
 
-var MIDI_PPQN = 24
+var MIDI_PPQN = 24;
 var SOCKET_PPQN = 4;
 var MIDI_CLOCK = 248;
 var MIDI_START = 251;
